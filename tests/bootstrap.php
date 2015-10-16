@@ -1,10 +1,4 @@
 <?php
-use Phalcon\DI,
-    Phalcon\DI\FactoryDefault;
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 define('ROOT_PATH',  str_replace('/tests', '', __DIR__));
 
 /**
@@ -24,8 +18,3 @@ function loadDepends($path, $isRequire = false){
 }
 
 loadDepends("/vendor/autoload.php");
-
-$config = loadDepends('/app/config/config.php');
-
-include_once(ROOT_PATH . "/app/config/loader.php");
-include_once(ROOT_PATH . "/app/config/services.php");
