@@ -1,14 +1,32 @@
 <?php
-namespace assets;
 
-class AssetsManagerTest extends \PHPUnit_Framework_TestCase {
+loadDepends("ExternalResource.php");
 
-    public function testGetFilesFromDir()
+class ExternalResourceTest extends \PHPUnit_Framework_TestCase
+{
+
+    public function testUrlisUnavailable()
     {
-        $link='http://bash.im';
+        $link = 'http://bash.im';
         $content = \ExternalResource::getResource($link);
-        $this->assertNotEmpty($content);
+        $this->assertNotContains("Ссылка недоступна ", $content);
 
+    }
+
+    public function testUrlisavailable()
+    {
+        $link = 'http://habrahabr.ru/kvakvakva/';
+        $content = \ExternalResource::getResource($link);
+        $this->assertContains("Ссылка недоступна ", $content);
+
+    }
+
+    public function testInstagram()
+    {
+        $link = 'https://instagram.com/p/5FgJNwspx9/?taken-by=jasonstatham';
+
+        $content = \ExternalResource::instagramHook($link);
+        $this->assertNotEquals($link, $content);
     }
 
 }

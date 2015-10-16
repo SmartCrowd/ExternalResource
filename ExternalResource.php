@@ -1,5 +1,4 @@
 <?php
-use helper\RequestManager;
 class ExternalResource
 {
     private static $base_href_exception_domains = ['https://vk.com'];
@@ -7,13 +6,8 @@ class ExternalResource
     {
         $link = self::instagramHook($link);
         if (self::get_http_response_code($link) != "404") {
-            $options = [
-                CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_FOLLOWLOCATION => 1,
-                CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
-            ];
-            $response = RequestManager::init($link)->setOptions($options)->exec(true, true);
+
+            $response = self::getUrl($link);
             $errCode = isset($response['errno']) ? $response['errno'] : 1;
             if ($errCode !== 0) {
                 return "Не удалось загрузить страницу\n" . $link . ". Error: " . $errCode;
@@ -30,6 +24,31 @@ class ExternalResource
         } else {
             return "Ссылка недоступна " . $link;
         }
+    }
+
+    public static function getUrl($link){
+        $ch=curl_init( self::encodeUrl($link) );
+        curl_setopt($ch,CURLOPT_FRESH_CONNECT,0);
+        curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch,CURLOPT_HEADER,0);
+        curl_setopt($ch,CURLOPT_USERAGENT,'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3');
+        $res = curl_exec($ch);
+        $content = curl_getinfo($ch);
+        $content['errno'] = curl_errno($ch);
+        $content['error'] = curl_error($ch);
+        $content['result'] = $res;
+        curl_close($ch);
+        return $content;
+    }
+    public static function encodeUrl($link)
+    {
+        if (!class_exists('\idna_convert'))
+            include_once("helper/idna_convert.class.php");
+
+        $converter = new \idna_convert();
+        $domain = parse_url($link, PHP_URL_HOST);
+        return str_replace($domain, $converter->encode($domain), $link);
     }
     /**
      *  Задание базового URL для относительных URL

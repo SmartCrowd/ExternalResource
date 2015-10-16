@@ -1,5 +1,6 @@
 <?php
-define('ROOT_PATH',  str_replace('/tests', '', __DIR__));
+ob_start();
+define('ROOT_PATH',  str_replace('tests', '', __DIR__));
 
 /**
  * @param string $path
