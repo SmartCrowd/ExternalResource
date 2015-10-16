@@ -168,6 +168,7 @@ class RequestManager
      */
     public static function getProxy($rus = false)
     {
+        return 'socks5://prx-ru.viewer.ru:1080';
         $lang = !$rus ? 'eu' : 'ru';
         $proxy = '';
         $proxies = self::getProxyList($lang);
@@ -199,12 +200,13 @@ class RequestManager
      */
     public static function getUserAgentsList()
     {
-        if (($agents = CDI()->cache->getKey('userAgentsList')) !== false) {
-            return Cache::unpack($agents);
-        }
-        $agents = self::loadFromFile(__DIR__.'/data/user_agent_list.txt');
-        if (count($agents))
-            CDI()->cache->setKey('userAgentsList', Cache::pack($agents));
+        /*   if (($agents = CDI()->cache->getKey('userAgentsList')) !== false) {
+              return Cache::unpack($agents);
+          }*/
+          $agents = self::loadFromFile(__DIR__.'/data/user_agent_list.txt');
+        /*  if (count($agents))
+              CDI()->cache->setKey('userAgentsList', Cache::pack($agents));
+        */
         return $agents;
     }
 
