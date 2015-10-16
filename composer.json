@@ -1,8 +1,8 @@
 {
-  "name": "smartcrowd/externalresource",
-  "description": "ExternalResource usage",
+  "name": "smart-crowd/external-resource",
+  "description": "Компонент для получения контента внешних ресурсов в блок Iframe",
   "keywords": [
-    "extResource"
+    "iframe"
   ],
   "homepage": "https://github.com//SmartCrowd/ExternalResource",
   "license": "MIT",
@@ -12,7 +12,9 @@
     }
   },
   "require": {
-    "php": ">=5.4.0",
+    "php": ">=5.4.0"
+  },
+  "require-dev": {
     "phpunit/phpunit": "~4.0"
   }
 }
