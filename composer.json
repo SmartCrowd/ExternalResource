@@ -1,0 +1,11 @@
+{
+    "name": "SmartCrowd/ExternalResource",
+    "description":"ExternalResource usage",
+    "keywords": ["extResource"],
+    "homepage": "https://github.com//SmartCrowd/ExternalResource",
+    "license": "MIT",
+    "require":{
+        "php": ">=5.4.0",
+        "smartcrowd/common_libs": "dev"
+    }
+}
