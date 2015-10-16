@@ -1,16 +1,19 @@
 {
-    "name": "smartcrowd/externalresource",
-    "description":"ExternalResource usage",
-    "keywords": ["extResource"],
-    "homepage": "https://github.com//SmartCrowd/ExternalResource",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "helper\\": "helper/",
-            "" : "."
-        }
-    },
-    "require":{
-        "php": ">=5.4.0"
+  "name": "smartcrowd/externalresource",
+  "description": "ExternalResource usage",
+  "keywords": [
+    "extResource"
+  ],
+  "homepage": "https://github.com//SmartCrowd/ExternalResource",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "helper\\": "helper/",
+      "": "."
     }
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "phpunit/phpunit": "~4.0"
+  }
 }
