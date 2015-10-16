@@ -7,6 +7,9 @@
     "autoload": {
         "psr-0" : {
             "externalresource" : ".."
+        },
+        "psr-4": {
+            "helper\\": "helper/"
         }
     },
     "require":{
