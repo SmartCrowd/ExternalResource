@@ -5,7 +5,9 @@ class AssetsManagerTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetFilesFromDir()
     {
-         $this->assertNotEmpty('1');
+        $link='http://bash.im';
+        $content = \ExternalResource::getResource($link);
+        $this->assertNotEmpty($content);
 
     }
 
