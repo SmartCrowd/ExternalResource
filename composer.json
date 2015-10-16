@@ -8,7 +8,6 @@
   "license": "MIT",
   "autoload": {
     "psr-0": {
-      "helper\\": "helper/",
       "": "."
     }
   },
