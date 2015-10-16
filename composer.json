@@ -4,10 +4,10 @@
     "keywords": ["extResource"],
     "homepage": "https://github.com//SmartCrowd/ExternalResource",
     "license": "MIT",
+    "minimum-stability": "dev",
     "require":{
         "php": ">=5.4.0",
-        "smartcrowd/common_libs": "dev-dev",
-        "minimum-stability": "dev"
+        "smartcrowd/common_libs": "dev-dev"
     },
     "repositories": [
         {
