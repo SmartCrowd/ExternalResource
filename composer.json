@@ -5,11 +5,9 @@
     "homepage": "https://github.com//SmartCrowd/ExternalResource",
     "license": "MIT",
     "autoload": {
-        "psr-0" : {
-            "externalresource" : ".."
-        },
         "psr-4": {
-            "helper\\": "helper/"
+            "helper\\": "helper/",
+            "" : "."
         }
     },
     "require":{
