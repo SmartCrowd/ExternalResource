@@ -1,30 +1,34 @@
 <?php
 
+use Etechnika\IdnaConvert\IdnaConvert;
+
 class ExternalResource
 {
+    
     private static $base_href_exception_domains = ['https://vk.com'];
+
+    private static $curl_options = [
+        CURLOPT_HEADER => 0,
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3',
+        CURLOPT_FRESH_CONNECT => 0,
+        CURLOPT_FOLLOWLOCATION => 1,
+        CURLOPT_RETURNTRANSFER => 1,
+    ];
 
     public static function getResource($link, $rel2abs = true)
     {
-        $link = self::instagramHook($link);
-        if (self::get_http_response_code($link) == "404") {
-            return "Ссылка недоступна " . $link;
+        $link = static::instagramHook($link);
+
+        try {
+            $link = static::encodeUrl($link);
+            $response = static::getContent($link);
+        } catch (\Exception $e) {
+            return $e->getMessage();
         }
 
-        $response = self::getUrl($link);
-        $errCode = isset($response['errno']) ? $response['errno'] : 1;
-        if ($errCode !== 0) {
-            return "Не удалось загрузить страницу\n" . $link . ". Error: " . $errCode;
-        }
+        static::setContentTypeHeaders($response);
 
-        $result = $rel2abs ? self::rel2abs($response['result'], $link) : $response['result'];
-
-        if (strpos($response['content_type'], 'charset')) {
-            header('Content-type:' . $response['content_type']);
-        } elseif (preg_match("/<meta[^>]+charset=[']?(.*?)[']?[\/\s>]/i", $result, $matches)) {
-            header('Content-type:' . $response['content_type'] . '; charset=' . $matches[1]);
-
-        }
+        $result = $rel2abs ? static::rel2abs($response['content'], $link) : $response['content'];
 
         return $result;
     }
@@ -34,74 +38,76 @@ class ExternalResource
      *
      * @param $link
      * @return string
+     * @throws Exception
      */
-    protected static function getUrl($link)
+    public static function getContent($link)
     {
-        $ch = curl_init(self::encodeUrl($link));
-        curl_setopt($ch, CURLOPT_FRESH_CONNECT, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3');
-        $res = curl_exec($ch);
-        $content = curl_getinfo($ch);
-        $content['errno'] = curl_errno($ch);
-        $content['error'] = curl_error($ch);
-        $content['result'] = $res;
+        $ch = curl_init($link);
+        curl_setopt_array($ch, static::$curl_options);
+        $content = curl_exec($ch);
+        $result  = curl_getinfo($ch);
+        $result['errno'] = curl_errno($ch);
+        $result['error'] = curl_error($ch);
+        $result['content'] = $content;
         curl_close($ch);
 
-        return $content;
+        if ($result['errno'] !== 0) {
+            throw new \Exception("Не удалось загрузить страницу\n" . $link . ". Error: " . $result['errno']);
+        }
+
+        if ($result['http_code'] != 200) {
+            throw new \Exception("Ссылка недоступна " . $result['http_code']);
+        }
+
+        return $result;
     }
 
     /**
-     *  Энкодинг url
+     * Энкодинг url
      *
      * @param $link
      * @return string
      */
-    protected static function encodeUrl($link)
+    public static function encodeUrl($link)
     {
-        if (!class_exists('\idna_convert'))
-            include_once("helper/idna_convert.class.php");
-
-        $converter = new \idna_convert();
         $domain = parse_url($link, PHP_URL_HOST);
+        $encoded_domain = IdnaConvert::encodeString($domain);
 
-        return str_replace($domain, $converter->encode($domain), $link);
+        return str_replace($domain, $encoded_domain, $link);
     }
 
     /**
-     *  Задание базового URL для относительных URL
+     * Задание базового URL для относительных URL
      *
      * @param $file
      * @param $url
      * @return mixed
      */
-    protected static function rel2abs($file, $url)
+    public static function rel2abs($file, $url)
     {
-        $full_domain = self::getHostFromUrl($url);
+        $full_domain = static::getHostFromUrl($url);
         $pattern = '#(<\s*((img)|(a)|(link))\s+[^>]*((src)|(href))\s*=\s*[\"\'])(?!\/\/)(?!http)([^\"\'>]+)([\"\'>]+)#';
         $file = preg_replace($pattern, '$1' . $full_domain . '$9$10', $file);
-        if (!in_array($full_domain, self::$base_href_exception_domains) && !preg_match('/(<base[^>]* href="(.*)">)/', $file)) {
+        if (!in_array($full_domain, static::$base_href_exception_domains)
+            && !preg_match('/(<base[^>]* href="(.*)">)/', $file)) {
             $file = preg_replace('/(<head[^>]*>)/', '$1<base href="' . $full_domain . '"/>', $file);
         }
 
         return $file;
     }
 
-    protected static function getHostFromUrl($url, $full = true)
+    /**
+     * @param  string $url
+     * @param  bool   $with_scheme
+     *
+     * @return string
+     */
+    public static function getHostFromUrl($url, $with_scheme = true)
     {
         $host = parse_url($url);
-        $host = $full ? $host['scheme'] . "://" . $host['host'] : $host['host'];
+        $host = $with_scheme ? $host['scheme'] . "://" . $host['host'] : $host['host'];
 
         return $host;
-    }
-
-    protected static function get_http_response_code($url)
-    {
-        $headers = get_headers($url);
-
-        return substr($headers[0], 9, 3);
     }
 
     /**
@@ -123,4 +129,14 @@ class ExternalResource
 
         return $link;
     }
+
+    public static function setContentTypeHeaders($response)
+    {
+        if (strpos($response['content_type'], 'charset')) {
+            header('Content-type:' . $response['content_type']);
+        } elseif (preg_match('/<meta[^>]+charset=[\']?(.*?)[\']?[\/\s>]/i', $response['content'], $matches)) {
+            header('Content-type:' . $response['content_type'] . '; charset=' . $matches[1]);
+        }
+    }
+    
 }
