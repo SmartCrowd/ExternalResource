@@ -1,5 +1,7 @@
 <?php
 
+use SmartCrowd\ExternalResource;
+
 /**
  * @coversDefaultClass ExternalResource
  * @runTestsInSeparateProcesses
@@ -12,16 +14,16 @@ class ExternalResourceTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetResource() {
         $link = 'http://vk.com';
-        $result = ExternalResource::getResource($link);
+        $result = ExternalResource::init($link)->getResource();
         $this->assertNotEmpty($result);
         $this->assertNotContains("Ссылка недоступна", $result);
 
         $link = 'http://habrahabr.ru/kvakvakva/';
-        $result = ExternalResource::getResource($link);
+        $result = ExternalResource::init($link)->getResource();
         $this->assertContains("Ссылка недоступна 404", $result);
 
         $link = 'http://kvakvakva/';
-        $result = ExternalResource::getResource($link);
+        $result = ExternalResource::init($link)->getResource();
         $this->assertContains("Не удалось загрузить страницу", $result);
     }
 
@@ -31,7 +33,7 @@ class ExternalResourceTest extends \PHPUnit_Framework_TestCase
     public function testInstagramHook()
     {
         $link = 'https://instagram.com/p/5FgJNwspx9/?taken-by=jasonstatham';
-        $content = \ExternalResource::instagramHook($link);
+        $content = ExternalResource::instagramHook($link);
         $this->assertNotEquals($link, $content);
     }
 

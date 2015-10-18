@@ -1,13 +1,14 @@
 <?php
 
+namespace SmartCrowd;
+
 use Etechnika\IdnaConvert\IdnaConvert;
 
 class ExternalResource
 {
-    
-    private static $base_href_exception_domains = ['https://vk.com'];
 
-    private static $curl_options = [
+    private $link;
+    private $curl_options = [
         CURLOPT_HEADER => 0,
         CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3',
         CURLOPT_FRESH_CONNECT => 0,
@@ -15,9 +16,25 @@ class ExternalResource
         CURLOPT_RETURNTRANSFER => 1,
     ];
 
-    public static function getResource($link, $rel2abs = true)
+    private static $base_href_exception_domains = ['https://vk.com'];
+
+    public function __construct($link) {
+        $this->link = $link;
+    }
+
+    public static function init($link) {
+        return new ExternalResource($link);
+    }
+
+    public function setCurlOptions(array $options) {
+        $this->curl_options = array_merge($this->curl_options, $options);
+
+        return $this;
+    }
+
+    public function getResource($rel2abs = true)
     {
-        $link = static::instagramHook($link);
+        $link = static::instagramHook($this->link);
 
         try {
             $link = static::encodeUrl($link);
@@ -38,12 +55,12 @@ class ExternalResource
      *
      * @param $link
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
-    public static function getContent($link)
+    public function getContent($link)
     {
         $ch = curl_init($link);
-        curl_setopt_array($ch, static::$curl_options);
+        curl_setopt_array($ch, $this->curl_options);
         $content = curl_exec($ch);
         $result  = curl_getinfo($ch);
         $result['errno'] = curl_errno($ch);
