@@ -26,8 +26,14 @@ class ExternalResource
         return new ExternalResource($link);
     }
 
+    /**
+     * Объединяем массивы параметров с сохранением ключей
+     *
+     * @param array $options
+     * @return $this
+     */
     public function setCurlOptions(array $options) {
-        $this->curl_options = array_merge($this->curl_options, $options);
+        $this->curl_options = $options + $this->curl_options;
 
         return $this;
     }
