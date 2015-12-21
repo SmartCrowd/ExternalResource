@@ -142,7 +142,7 @@ class ExternalResource
      */
     public static function instagramHook($link)
     {
-        $instagram_hosts = ['instagram.com'];
+        $instagram_hosts = ['instagram.com', 'www.instagram.com'];
         $parsed_url = parse_url($link);
         $host = isset($parsed_url['host']) ? strtolower($parsed_url['host']) : "";
         if (in_array($host, $instagram_hosts)) {
