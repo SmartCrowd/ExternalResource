@@ -65,14 +65,9 @@ class ExternalResource
      */
     public function getContent($link)
     {
-        $ch = curl_init($link);
-        curl_setopt_array($ch, $this->curl_options);
-        $content = curl_exec($ch);
-        $result  = curl_getinfo($ch);
-        $result['errno'] = curl_errno($ch);
-        $result['error'] = curl_error($ch);
-        $result['content'] = $content;
-        curl_close($ch);
+        do {
+            $result = $this->getResponse($link);
+        } while ($result['errno'] == 7);
 
         if ($result['errno'] !== 0) {
             throw new \Exception("Не удалось загрузить страницу\n" . $link . ". Error: " . $result['errno']);
@@ -81,6 +76,25 @@ class ExternalResource
         if ($result['http_code'] != 200) {
             throw new \Exception("Ссылка недоступна " . $result['http_code']);
         }
+
+        return $result;
+    }
+
+    /**
+     * @param $link
+     * @return mixed
+     *
+     */
+    public function getResponse($link)
+    {
+        $ch = curl_init($link);
+        curl_setopt_array($ch, $this->curl_options);
+        $content = curl_exec($ch);
+        $result  = curl_getinfo($ch);
+        $result['errno'] = curl_errno($ch);
+        $result['error'] = curl_error($ch);
+        $result['content'] = $content;
+        curl_close($ch);
 
         return $result;
     }
@@ -161,5 +175,5 @@ class ExternalResource
             header('Content-type:' . $response['content_type'] . '; charset=' . $matches[1]);
         }
     }
-    
+
 }
