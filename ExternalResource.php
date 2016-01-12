@@ -8,6 +8,7 @@ class ExternalResource
 {
 
     private $link;
+    private $max_error = 1;
     private $curl_options = [
         CURLOPT_HEADER => 0,
         CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3',
@@ -65,9 +66,11 @@ class ExternalResource
      */
     public function getContent($link)
     {
+        $i = 0;
         do {
             $result = $this->getResponse($link);
-        } while ($result['errno'] == 7);
+            $i++;
+        } while ($result['errno'] == 7 && $this->max_error >= $i);
 
         if ($result['errno'] !== 0) {
             throw new \Exception("Не удалось загрузить страницу\n" . $link . ". Error: " . $result['errno']);
