@@ -164,6 +164,7 @@ class ExternalResource
         $host = isset($parsed_url['host']) ? strtolower($parsed_url['host']) : "";
         if (in_array($host, $instagram_hosts)) {
             $link = preg_replace('/\/embed(\/captioned)?(\/)?$/i', '', $link);
+            $link = rtrim($link, '\/');
             $link = $link . "/embed/captioned";
         }
 
